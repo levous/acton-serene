@@ -1,0 +1,10 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #{title}
+
+  div !{managedContent.html['top-left']}
+  div !{managedContent.html['top-right']}
+block footer
+  div !{managedContent.html['footer']}

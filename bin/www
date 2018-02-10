@@ -1,0 +1,33 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+var app = require('../server/server-app');
+var debug = require('debug')('tchs:server');
+var http = require('http');
+var dotenv = require('dotenv').config();
+
+/**
+ * Get port from environment
+ */
+
+var port;
+
+if(process.env.NODE_ENV === "test"){
+  port = process.env.TEST_PORT;
+}else{
+  port = process.env.PORT;
+}
+
+/**
+ * Start web server
+ */
+
+app.set('port', port || 2001);
+
+app.listen(port, function(err){
+  if(err) throw err;
+  console.log("App listening on port " + port);
+});
