@@ -123,6 +123,11 @@ PORT=2001
 DB_URI=mongodb://localhost/cms
 TEST_PORT=2002
 TEST_DB_URI=mongodb://localhost/cms_test
+AWS_S3_KEY=ABRAKADABRAMWIZWOSKI
+AWS_S3_SECRET=ouYMcDubStepTi/m4rFaStrHP+C3P0F88R2d2Luk
+AWS_S3_REGION=us-east-1
+AWS_S3_ASSET_BUCKET=this-is-bukethead
+AWS_CLOUDFRONT_BASE_URL=d1ndwe4oesflqo.cloudfront.net
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
  
