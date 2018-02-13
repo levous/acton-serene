@@ -158,7 +158,7 @@ describe('ContentPackageController Spec', function () {
 				contentFragments:[
 					{
 						containerKey: 'non-matching-container',
-						markdown: 'Not the markdown you are looking for'
+						markdown: 'It is the markdown you are looking for'
 					}
 				]
 			})
@@ -172,6 +172,45 @@ describe('ContentPackageController Spec', function () {
 				contentPackage.contentFragments.should.be.instanceof(Array).and.have.lengthOf(1);
         contentPackage.appKey.should.equal(appKey);
         contentPackage.resourceTargetPath.should.equal(resKey);
+      });
+
+		});
+
+	});
+
+	describe('ContentPackage getManagedContent()', function () {
+
+    it('Should retrieve managedContent when key matches', function () {
+
+			const appKey = 'app-key-managed',
+        resKey = 'resource-targeting-key',
+				containerKey = 'fragement-key',
+				markdown = '**bolded** and _stuff_';
+
+			var ContentPackageController = require('../../controllers/content-package.controller')(ContentPackage);
+
+			return new ContentPackage({
+				appKey: appKey,
+				resourceTargetPath: resKey,
+				contentFragments:[
+					{
+						containerKey: containerKey,
+						markdown: markdown
+					}
+				]
+			})
+			.save()
+			.then((item) => {
+				should.exist(item);
+				return ContentPackageController.getManagedContent(appKey, resKey);
+			})
+      .then(managedContent => {
+				managedContent.should.be.an.instanceOf(Object);
+				managedContent.html.should.be.instanceof(Object);
+        managedContent.html[containerKey].should.be.instanceof(String);
+				managedContent.markdown.should.be.instanceof(Object);
+        managedContent.markdown[containerKey].should.be.instanceof(String).and.equal(markdown);
+        managedContent.html[containerKey].should.be.instanceof(String).and.equal('<p><strong>bolded</strong> and <em>stuff</em></p>');
       });
 
 		});

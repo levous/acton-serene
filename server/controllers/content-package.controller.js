@@ -12,6 +12,8 @@ var ContentPackageController = function(ContentPackage){
 	Controller.getManagedContent = function(appKey, resourceTargetPath) {
 		return Controller.findPackage(appKey, resourceTargetPath)
 		.then(contentPackage => {
+			//TODO: convert to rich NotFoundError
+			if(!contentPackage) throw new Error('Not Found');
       var managedContent = {html: {}, markdown: {}};
       contentPackage.contentFragments.forEach(fragment => {
         managedContent.html[fragment.containerKey] = markdown.toHTML(fragment.markdown);

@@ -22,6 +22,35 @@
   font-size: large;
 }
 
+.http-status-box{
+  width: 400px;
+  color: rgb(200,0,0);
+  font-size: 1.2em;
+}
+
+.http-status-enter {
+  opacity: .01;
+	transform: scaleX(0) translateY(100px);
+}
+
+.http-status-enter.http-status-enter-active {
+	opacity: 1;
+	transform: scaleX(1) translateY(0);
+	transition: all 500ms ease-in-out;
+}
+
+.http-status-leave {
+	opacity: 1;
+	transform: scaleX(1) translateY(0);
+}
+
+.http-status-leave-active {
+	opacity: 0;
+	transform: scaleX(0) translateY(100px);
+	transition: all 300ms ease-in-out
+}
+
+
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
