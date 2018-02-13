@@ -6,7 +6,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var dotenv = require('dotenv').config();
 var mongoose = require('mongoose');
-
+var cors = require('cors');
 var index = require('./routes/index');
 var users = require('./routes/users');
 var contentPackagesRoute = require('./routes/api/content-packages');
@@ -14,6 +14,9 @@ var contentPackagesRoute = require('./routes/api/content-packages');
 var setupRoutes = require('./setup-routes');
 
 var app = express();
+
+// enable CORS so react client can request from different port or domain
+app.use(cors())
 
 /**
  * Get db uri from environment
@@ -25,6 +28,9 @@ if(process.env.NODE_ENV === "test"){
   dbUri = process.env.TEST_DB_URI;
 }else{
 	dbUri = process.env.DB_URI;
+}
+if(!dbUri){
+  console.log('=====>   Hey chump!  I epected you to provide DB_URI either as an environment variable in the host process or in a .env file.  See DotEnv npm package for configuration details');
 }
 
 /**

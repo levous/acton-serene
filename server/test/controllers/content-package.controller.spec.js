@@ -143,6 +143,41 @@ describe('ContentPackageController Spec', function () {
 
   });
 
+	describe('ContentPackage findPackage()', function () {
+
+    it('Should retrieve matching ContentPackage when key matches', function () {
+
+			const appKey = 'app-key',
+        resKey = 'resource-targeting-key';
+
+			var ContentPackageController = require('../../controllers/content-package.controller')(ContentPackage);
+
+			return new ContentPackage({
+				appKey: appKey,
+				resourceTargetPath: resKey,
+				contentFragments:[
+					{
+						containerKey: 'non-matching-container',
+						markdown: 'Not the markdown you are looking for'
+					}
+				]
+			})
+			.save()
+			.then((item) => {
+				should.exist(item);
+				return ContentPackageController.findPackage(appKey, resKey);
+			})
+      .then(contentPackage => {
+				contentPackage.should.be.an.instanceOf(Object)
+				contentPackage.contentFragments.should.be.instanceof(Array).and.have.lengthOf(1);
+        contentPackage.appKey.should.equal(appKey);
+        contentPackage.resourceTargetPath.should.equal(resKey);
+      });
+
+		});
+
+	});
+
 });
     /*
 		it('Should save todo', function (done) {

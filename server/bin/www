@@ -4,9 +4,10 @@
  * Module dependencies.
  */
 
-var app = require('../server/server-app');
+var app = require('../server-app');
 var debug = require('debug')('tchs:server');
 var http = require('http');
+
 var dotenv = require('dotenv').config();
 
 /**
@@ -21,11 +22,14 @@ if(process.env.NODE_ENV === "test"){
   port = process.env.PORT;
 }
 
+port = port || 2001
 /**
  * Start web server
  */
 
-app.set('port', port || 2001);
+app.set('port', port);
+
+
 
 app.listen(port, function(err){
   if(err) throw err;

@@ -19,7 +19,17 @@ exports.setup = (basePath, app) => {
     .catch(next);
   });
 
-	app.get('/api/cp', Controller.getAll);
+	router.get('/:appKey/:resourceTargetPath', (req, res, next) => {
+		const {appKey, resourceTargetPath} = req.params;
+		Controller.findPackage(appKey, resourceTargetPath)
+    .then(contentPackage => {
+			if(!contentPackage) throw new Error('Not Found');
+      res.json({contentPackage: contentPackage});
+    })
+    .catch(next);
+	});
+
+	app.get('/', Controller.getAll);
 
 	//app.get('/:id', Controller.findById);
 
