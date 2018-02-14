@@ -84,15 +84,18 @@ var ContentPackageController = function(ContentPackage){
 		});
 	}
 
-	Controller.getAll = function(req, res, next){
+	Controller.getContentResourceList = appKey => {
+		if(!appKey) return Promise.reject(new errors.MissingParameterError('appKey was not provided'));
 
-		ContentPackage.find(function(err, results){
-			if(err) {
-				res.json({status: false, error: "Something went wrong"});
-				return
-			}
-			res.json({status: true, ContentPackages: results});
-		});
+		return ContentPackage.find({'appKey': appKey})
+			.select({
+				appKey: 1,
+				published: 1,
+				resourceTargetPath: 1,
+				updatedAt: 1
+			})
+			.lean()
+			.exec();
 	}
 
 	Controller.publish = function(req, res, next){

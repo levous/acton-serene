@@ -16,7 +16,7 @@ const propTypes = {
 
 const defaultProps = {};
 
-/*
+/* **
  * Simple editor component that takes placeholder text as a prop
  */
 class Editor extends React.Component {
@@ -28,7 +28,11 @@ class Editor extends React.Component {
     this.handleChange = this.handleChange.bind(this);
   }
 
-  handleChange (html) {
+  handleChange(content, delta, source, editor) {
+
+    //  value is a delta, get html contents instead.
+    //    Delta might be badass: https://github.com/zenoamaro/react-quill#using-deltas
+    const html = editor.getHTML();
     if(this.props.onHtmlUpdate) this.props.onHtmlUpdate(html);
   }
 
@@ -39,13 +43,14 @@ class Editor extends React.Component {
           {".ql-editor { min-height: 15em}"}
         </style>
         <ReactQuill
+          ref={(el) => { this.reactQuillRef = el }}
           theme={this.state.theme}
           onChange={this.handleChange}
           value={this.props.editorHtml}
           modules={Editor.modules}
           formats={Editor.formats}
           bounds={'.app'}
-          placeholder={this.props.editorHtml}
+          placeholder='Author or Paste your contents'
          />
        </div>
      )

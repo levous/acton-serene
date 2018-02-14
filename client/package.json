@@ -4,8 +4,10 @@
   "private": true,
   "dependencies": {
     "bootstrap": "^4.0.0",
+    "history": "^4.7.2",
     "jquery": "^1.9.1",
     "markdown": "^0.5.0",
+    "moment": "^2.20.1",
     "popper.js": "^1.12.9",
     "prop-types": "^15.6.0",
     "quill-image-drop-module": "^1.0.3",

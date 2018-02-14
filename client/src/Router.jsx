@@ -6,7 +6,10 @@ import {
   Link
 } from 'react-router-dom'
 
-import ContentPackageAdminPage from './containers/ContentPackageAdminPage';
+// Struggling with a weird routing issue
+// import { createBrowserHistory } from 'history'
+// <Router history={createBrowserHistory()}>
+import ContentPackageAdminPage from './containers/managed-content-admin-page'
 
 const Home = () => (
   <div>
@@ -27,14 +30,14 @@ const RouterComponent = () => (
       <ul>
         <li><Link to="/">Home</Link></li>
         <li><Link to="/about">About</Link></li>
-        <li><Link to="/contentPage/example">example</Link></li>
+        <li><Link to="/content-page/example">example</Link></li>
       </ul>
 
       <hr/>
 
       <Route exact path="/" component={Home}/>
       <Route path="/about" component={About}/>
-      <Route path="/contentPage/:resourceKey" component={ContentPackageAdminPage} />
+      <Route path="/content-page/:resourceKey" component={ContentPackageAdminPage} />
     </div>
   </Router>
 )
