@@ -88,7 +88,8 @@ Content is delivered as a `ContentPackage` having the following structure:
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
- 
+ // NOTE: the above is how the server manages the content.  below is how the content is delivered to the admin and any consumer.  Need to update README to reflect this...
+
 
 Essentially, a collection of fragments organized as a hash with string-based
 key. Each hash item key corresponds to potential targeting area of the page. In
@@ -108,6 +109,18 @@ you see fit.
 Also included is a Json handler can be registered against any route. This
 handler will send the contents of the request.managedContent through the
 response object as JSON.
+
+
+Templates
+-------------
+
+NOTE: Idea for Templates
+
+The html template is stored as a document and referenced either from the app (via appKey) or from a resource.  
+The html has a matching div for each containerKey in a ContentPackage doc.  At runtime, the div with the key has the content poured in and served.  During template design, the designer can include 'lorem ispum' r whatever.  It will be parsed out and replaced.
+Templates can be used via admin, too.  Although there might be an issue with css and javascript collision.   Might have to think that through.  At the very least, a preview would be feasible.  Perhaps in the case of complex templates, a simplified AdminTemplate could be included to provide similar layout but not all the formatting.
+
+
 
 Configuration
 -------------

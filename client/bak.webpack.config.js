@@ -95,6 +95,8 @@ module.exports = (env = {}) => {
         }]
     },
     plugins: [
+      new webpack.ProvidePlugin({'window.Quill': 'quill'}),
+      new webpack.ProvidePlugin({'window.tryme': './tryme.js'}),
       new webpack.HotModuleReplacementPlugin(),
       new webpack.optimize.UglifyJsPlugin({sourceMap: true}),
       new webpack.NamedModulesPlugin(),

@@ -2,11 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import ReactQuill, {Quill} from 'react-quill';
 import {ImageDrop} from 'quill-image-drop-module';
-// import ImageResize from 'quill-image-resize-module';
+import ImageResize from 'quill-image-resize-module';
 import 'react-quill/dist/quill.snow.css';
 
 Quill.register('modules/imageDrop', ImageDrop);
-// throws big stupid error Quill.register('modules/imageResize', ImageResize);
+Quill.register('modules/imageResize', ImageResize);
 
 const propTypes = {
   placeholderText: PropTypes.string,
@@ -22,9 +22,6 @@ const defaultProps = {};
 class Editor extends React.Component {
   constructor (props) {
     super(props);
-    this.state = {
-      theme: 'snow'
-    };
     this.handleChange = this.handleChange.bind(this);
   }
 
@@ -44,7 +41,7 @@ class Editor extends React.Component {
         </style>
         <ReactQuill
           ref={(el) => { this.reactQuillRef = el }}
-          theme={this.state.theme}
+          theme='snow'
           onChange={this.handleChange}
           value={this.props.editorHtml}
           modules={Editor.modules}
@@ -74,7 +71,9 @@ Editor.modules = {
   clipboard: {
     // toggle to add extra line breaks when pasting HTML:
     matchVisual: false,
-  }
+  },
+  imageDrop: true,
+  imageResize: {}
 }
 /*
  * Quill editor formats
