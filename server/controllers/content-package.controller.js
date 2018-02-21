@@ -1,7 +1,10 @@
 "use strict";
-const markdown = require( "markdown" ).markdown;
-
+const markdownIt = require("markdown-it");
+const markdownItAttrs = require('markdown-it-attrs');
 const errors = {MissingParameterError: Error};
+
+const mdown = markdownIt({xhtmlOut:true});
+mdown.use(markdownItAttrs);
 
 var ContentPackageController = function(ContentPackage){
 
@@ -14,9 +17,11 @@ var ContentPackageController = function(ContentPackage){
 		.then(contentPackage => {
 			//TODO: convert to rich NotFoundError
 			if(!contentPackage) throw new Error('Not Found');
-      var managedContent = {html: {}, markdown: {}};
+
+
+      let managedContent = {html: {}, markdown: {}};
       contentPackage.contentFragments.forEach(fragment => {
-        managedContent.html[fragment.containerKey] = markdown.toHTML(fragment.markdown);
+        managedContent.html[fragment.containerKey] = mdown.render(fragment.markdown);
 				managedContent.markdown[fragment.containerKey] = fragment.markdown;
       })
 			return managedContent
@@ -68,10 +73,21 @@ var ContentPackageController = function(ContentPackage){
 
 				return new ContentPackage(newCP).save();
 			}
+		})
+		.then(contentPackage => {
+			if(!contentPackage) throw new Error('Save failed');
+			const contentFragment = contentPackage.contentFragments.find(fragment => fragment.containerKey === containerKey);
+			if(!contentFragment) throw new Error('Save failed while trying to find new fragment');
+			return {
+				appKey: contentPackage.appKey,
+				resourceTargetPath: contentPackage.resourceTargetPath,
+				containerKey: contentFragment.containerKey,
+				markdown: contentFragment.markdown,
+				html: mdown.render(contentFragment.markdown)
+			}
 		});
 	}
-
-
+	
 
 	Controller.post = function(req, res, next){
 		var newContentPackage = new ContentPackage(req.body);

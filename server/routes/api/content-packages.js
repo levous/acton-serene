@@ -51,8 +51,8 @@ router.post('/:appKey/:resourceTargetPath/:containerKey', (req, res, next) => {
 	markdownPromise.then(finalMarkdown => {
 			return Controller.saveFragment(appKey, resourceTargetPath, containerKey, finalMarkdown)
 		})
-		.then(contentPackage => {
-	    res.json({contentPackage:contentPackage});
+		.then(contentFragment => {
+	    res.json({contentFragment:contentFragment});
 	  })
 	  .catch(next);
 	});

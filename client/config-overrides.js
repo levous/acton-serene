@@ -16,6 +16,6 @@ module.exports = function override(config, env) {
   config = rewireProvidePlugin(config, env, {
     'window.Quill': ['react-quill', 'Quill']
   })
-  console.log('hi there');
+  console.log('set window.Quill to \'react-quill/Quill\' via react-app-rewire-provide-plugin');
   return config;
 }

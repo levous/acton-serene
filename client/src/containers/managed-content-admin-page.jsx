@@ -7,8 +7,10 @@ import { Transition } from 'react-transition-group';
 import path from 'path';
 import { Button, Panel } from 'react-bootstrap';
 import Turndown from 'turndown';
+import TurndownPluginImageWithStyle from 'turndown-plugin-image-with-style';
 import Editor from '../components/editor';
 import ResourceList from '../components/content-admin/resource-list';
+import ResourceEdit from '../components/content-admin/resource-edit';
 import HttpStatusPresenter from '../components/http-status-presenter';
 import LoadingSpinner from '../components/loading-spinner';
 
@@ -53,6 +55,8 @@ const Fade = ({ in: inProp, fetchResponseStatus }) => (
   </Transition>
 );
 
+const turndownService = new Turndown();
+turndownService.use(TurndownPluginImageWithStyle);
 
 class ManagedContentAdminPage extends Component {
 
@@ -157,6 +161,8 @@ class ManagedContentAdminPage extends Component {
 
   saveManagedContentFragment(containerKey) {
 
+    //TODO: when image resize or align is applied, it doesn't call an update.  Can a call be foreced from the editor?
+
     const htmlFragment = this.state.updatedHtmlFragments[containerKey];
     if(!htmlFragment) return alert('UH OH!  The expected content was not found.  I got a null.  Please talk to Rusty');
     if(!this.state.managedContent) return alert('BRRRRT!  No Content Loaded to Save');
@@ -164,7 +170,7 @@ class ManagedContentAdminPage extends Component {
     this.showLoading(true);
 
     const apiURI = API_HOST + path.join('api', 'content-packages', APP_KEY, this.props.match.params.resourceKey, containerKey);
-    const markdown = new Turndown().turndown(htmlFragment);
+    const markdown = turndownService.turndown(htmlFragment);
 
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
@@ -184,17 +190,23 @@ class ManagedContentAdminPage extends Component {
       }
       return response.json();
     }).then(function(data) {
+      console.log(data);
+      that.handleHtmlUpdate(data.contentFragment.containerKey, data.contentFragment.html)
       that.showLoading(false);
     }).catch(that.handleFetchError);
   }
 
   addNewResource(){
-    
+
   }
 
   handleSelectResource(resource) {
     this.props.history.push(`/content-page/${resource.resourceTargetPath}`);
     this.loadManagedContent(resource.resourceTargetPath);
+  }
+
+  handleResourceUpdate(resource) {
+
   }
 
   handleHtmlUpdate(containerKey, html){
@@ -210,17 +222,21 @@ class ManagedContentAdminPage extends Component {
 
     const fetchResponseStatus = this.state.fetchResponseStatus;
 
-    const createFragmentEditor = (containerKey, fragment) => {
-      console.log(containerKey);
+    const FragmentEditorList = ({ htmlFragments, ...props }) => {
       return (
-        <Panel key={containerKey}>
-          <Panel.Body>
-            <h2>{containerKey}</h2>
-            <Editor editorHtml={fragment} onHtmlUpdate={(html) => this.handleHtmlUpdate(containerKey, html) }/>
-            <Button bsStyle="primary" style={{float:'right', marginTop: '25px'}} onClick={() => this.saveManagedContentFragment(containerKey) }>Save</Button>
-            <small><div>{ contentFragment }</div></small>
-          </Panel.Body>
-        </Panel>
+        <div {...props} >
+          {Object.entries(htmlFragments).map(([containerKey, fragment]) => (
+            <Panel key={containerKey}>
+              <Panel.Body>
+                <h2>{containerKey}</h2>
+                <Editor editorHtml={fragment} onHtmlUpdate={(html) => this.handleHtmlUpdate(containerKey, html) }/>
+                <Button bsStyle="primary" style={{float:'right', marginTop: '25px'}} onClick={() => this.saveManagedContentFragment(containerKey) }>Save</Button>
+                <small><div>{ contentFragment }</div></small>
+              </Panel.Body>
+            </Panel>
+          ))}
+        </div>
+
       )
     }
 
@@ -229,7 +245,12 @@ class ManagedContentAdminPage extends Component {
     return (
       <div>
         <Button style={{float:'right', margin: '5px'}} onClick={() => this.addNewResource() }>+</Button>
-        <div style={{clear:'both'}} />
+        <div style={{clear:'both'}}>
+          <ResourceEdit resource={this.state.editResource}
+            onResourceUpdate={(resource) => this.handleResourceUpdate(resource)}
+            />
+        </div>
+
         <ResourceList resourceList={this.state.resourceList}
           selectedResourceTargetPath={this.props.match.params.resourceKey}
           onSelectResource={(resource) => this.handleSelectResource(resource)}
@@ -237,10 +258,8 @@ class ManagedContentAdminPage extends Component {
 
         <h1>{this.props.match.params.resourceKey}</h1>
 
-        <Fade in={fetchResponseStatus} fetchResponseStatus={fetchResponseStatus} />
-        <div>
-          {Object.entries(htmlFragments).map(([key, value]) => createFragmentEditor(key, value))}
-        </div>
+        <Fade in={(fetchResponseStatus !== null)} fetchResponseStatus={fetchResponseStatus} />
+        <FragmentEditorList htmlFragments={htmlFragments}/>
         {
           //<Editor key={0} editorHtml={contentFragment} onHtmlUpdate={(html) => this.handleHtmlUpdate(CONTAINER_KEY, html) }/>
 

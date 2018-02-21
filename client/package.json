@@ -6,7 +6,6 @@
     "bootstrap": "^4.0.0",
     "history": "^4.7.2",
     "jquery": "^1.9.1",
-    "markdown": "^0.5.0",
     "moment": "^2.20.1",
     "popper.js": "^1.12.9",
     "prop-types": "^15.6.0",
@@ -15,10 +14,11 @@
     "react": "^16.2.0",
     "react-bootstrap": "^0.32.1",
     "react-dom": "^16.2.0",
-    "react-quill": "^1.2.2",
+    "react-quill": "^1.2.4",
     "react-router-dom": "^4.2.2",
     "react-scripts": "1.1.1",
-    "react-transition-group": "^2.2.1"
+    "react-transition-group": "^2.2.1",
+    "turndown-plugin-image-with-style": "^1.0.5"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",

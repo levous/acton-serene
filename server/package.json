@@ -16,6 +16,8 @@
     "express": "~4.15.5",
     "jquery": "^3.3.1",
     "markdown": "^0.5.0",
+    "markdown-it": "^8.4.1",
+    "markdown-it-attrs": "^1.2.1",
     "mime-types": "^2.1.17",
     "mongoose": "^5.0.3",
     "morgan": "~1.9.0",

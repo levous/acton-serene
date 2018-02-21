@@ -37,7 +37,7 @@ describe('ContentPackageController Spec', function () {
 
     it('Should create a new ContentPackage when no match found', function () {
 
-			const markdown = 'Test content',
+			const markdown = 'Test _content_',
         appKey = 'app-key',
         resKey = 'resource-targeting-key',
         containerKey = 'content-container-key';
@@ -45,11 +45,12 @@ describe('ContentPackageController Spec', function () {
 			var ContentPackageController = require('../../controllers/content-package.controller')(ContentPackage);
 
 			return ContentPackageController.saveFragment(appKey, resKey, containerKey, markdown)
-      .then(contentPackage => {
-				contentPackage.should.be.an.instanceOf(Object)
-				contentPackage.contentFragments.should.be.instanceof(Array).and.have.lengthOf(1);
-        contentPackage.appKey.should.equal(appKey);
-        contentPackage.resourceTargetPath.should.equal(resKey);
+      .then(contentFragment => {
+				contentFragment.html.should.be.instanceof(String).and.equal('<p>Test <em>content</em></p>\n');
+				contentFragment.markdown.should.be.instanceof(String).and.equal(markdown);
+				contentFragment.containerKey.should.equal(containerKey);
+        contentFragment.appKey.should.equal(appKey);
+        contentFragment.resourceTargetPath.should.equal(resKey);
       });
 
 		});
@@ -78,7 +79,11 @@ describe('ContentPackageController Spec', function () {
 				should.exist(item);
 				return ContentPackageController.saveFragment(appKey, resKey, containerKey, markdown);
 			})
-      .then(contentPackage => {
+      .then(contentFragment => {
+				contentFragment.markdown.should.be.instanceof(String).and.equal(markdown);
+				return ContentPackageController.findPackage(contentFragment.appKey, contentFragment.resourceTargetPath)
+			})
+			.then(contentPackage => {
 				contentPackage.should.be.an.instanceOf(Object);
 				contentPackage.contentFragments.should.be.instanceof(Array).and.have.lengthOf(1);
         contentPackage.appKey.should.equal(appKey);
@@ -121,6 +126,9 @@ describe('ContentPackageController Spec', function () {
 			.then((item) => {
 				should.exist(item);
 				return ContentPackageController.saveFragment(appKey, resKey, containerKey, markdown);
+			})
+      .then(contentFragment => {
+				return ContentPackageController.findPackage(contentFragment.appKey, contentFragment.resourceTargetPath)
 			})
       .then(contentPackage => {
 				contentPackage.should.be.an.instanceOf(Object);
@@ -185,7 +193,7 @@ describe('ContentPackageController Spec', function () {
 			const appKey = 'app-key-managed',
         resKey = 'resource-targeting-key',
 				containerKey = 'fragement-key',
-				markdown = '**bolded** and _stuff_';
+				markdown = '**bolded** and _stuff_![alt text](imageurl.gif){style="float:left" width=10px}';
 
 			var ContentPackageController = require('../../controllers/content-package.controller')(ContentPackage);
 
@@ -210,7 +218,7 @@ describe('ContentPackageController Spec', function () {
         managedContent.html[containerKey].should.be.instanceof(String);
 				managedContent.markdown.should.be.instanceof(Object);
         managedContent.markdown[containerKey].should.be.instanceof(String).and.equal(markdown);
-        managedContent.html[containerKey].should.be.instanceof(String).and.equal('<p><strong>bolded</strong> and <em>stuff</em></p>');
+        managedContent.html[containerKey].should.be.instanceof(String).and.equal('<p><strong>bolded</strong> and <em>stuff</em><img src="imageurl.gif" alt="alt text" style="float:left" width="10px" /></p>\n');
       });
 
 		});
