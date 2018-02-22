@@ -206,12 +206,13 @@ class Editor extends React.Component {
           ref={(el) => { this.reactQuillRef = el }}
           theme='snow'
           onChange={this.handleChange}
-          value={this.props.editorHtml}
           modules={Editor.modules}
           formats={Editor.formats}
           bounds={'.app'}
           placeholder='Author or Paste your contents'
-         />
+         >
+            <div className="my-editing-area" dangerouslySetInnerHTML={{__html: this.props.editorHtml}} />
+         </ReactQuill>
        </div>
      )
   }

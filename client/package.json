@@ -9,6 +9,7 @@
     "moment": "^2.20.1",
     "popper.js": "^1.12.9",
     "prop-types": "^15.6.0",
+    "quill": "file:../../quill",
     "quill-image-drop-module": "^1.0.3",
     "quill-image-resize-module": "^3.0.0",
     "react": "^16.2.0",
