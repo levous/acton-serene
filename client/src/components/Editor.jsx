@@ -118,5 +118,4 @@ Editor.formats = [
 Editor.propTypes = propTypes;
 Editor.defaultProps = defaultProps;
 
-
 export default Editor;
