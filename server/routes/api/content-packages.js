@@ -8,47 +8,71 @@ const router = express.Router();
 
 exports.setup = (basePath, app) => {
 
-//TODO: Refactor to extract the params and pass rather than the request and response.
-//TODO: Refactor to use provided path rather than fully qualified.
-//TODO: For now the POST '/:appKey/:resourceTargetPath/:containerKey' returns the ContentPackage it's contained by.  This should probably be either ManagedContent or a json representation of the fragment.
-/**
- * POST
- * @param json {markdown=String}
- * @returns ///See TODO
- */
-router.post('/:appKey/:resourceTargetPath/:containerKey', (req, res, next) => {
-	let markdown = req.body.markdown;
-	const {appKey, resourceTargetPath, containerKey} = req.params;
-
-	let markdownPromise = new Promise((resolve, reject) => resolve(markdown));
-
-	// look for base64 embedded images
-	const markdownAssetExtractor = new MarkdownAssetExtractor(markdown);
-	if(markdownAssetExtractor.containsBase64Images()) {
-		// parse them out
-		const extracted = markdownAssetExtractor.extractBase64Images();
-		const s3Pub = new S3Publisher();
-		const folderPath = `test`;
-
-		const publishes = extracted.images.map((match, index) => {
-			return s3Pub.publishAsset(match.fileName, match.base64, folderPath, match.imageType);
+	//TODO: Refactor to extract the params and pass rather than the request and response.
+	//TODO: Refactor to use provided path rather than fully qualified.
+	//TODO: For now the POST '/:appKey/:resourceTargetPath/:containerKey' returns the ContentPackage it's contained by.  This should probably be either ManagedContent or a json representation of the fragment.
+	/**
+	 * POST
+	 * @param json {contentPackage={}}
+	 * @returns json {contentPackage={}}
+	 */
+	router.post('/:appKey/', (req, res, next) => {
+		let contentPackage = req.body.contentPackage;
+		const {appKey} = req.params;
+		if(!(contentPackage && contentPackage.resourceTargetPath)) throw new Error('content package requires at least \'appKey\' and \'resourceTargetPath\'');
+		if(!contentPackage.appKey) contentPackage.appKey = appKey;
+		if(contentPackage.appKey !== appKey) throw new Error('Hey Bozo! Stop trying to cross app post content packages.  property appKey must match appKey in path');
+		if(contentPackage.contentFragments) throw new Error('Please do not send html with this post.  Html should be saved a fragment at a time.  Create the package and then post html.');
+		return Controller.savePackage(contentPackage)
+		.then(updatedPackage => {
+			res.json({contentPackage: updatedPackage});
 		})
+		.catch(next);
+	})
 
-		markdownPromise = Promise.all(publishes)
-			.then(assets => {
-				let finalMarkdown = extracted.updatedMarkdown;
-				console.log('>>>> finalMarkdown')
-				console.log(finalMarkdown)
-				assets.forEach(asset => {
-					finalMarkdown = finalMarkdown.replace(asset.originalFileName, asset.url);
-				})
+	/**
+	 * POST
+	 * @param json {markdown=String}
+	 * @returns ///See TODO
+	 */
+	router.post('/:appKey/:resourceTargetPath/:containerKey', (req, res, next) => {
+		let markdown = req.body.markdown;
+		const {appKey, resourceTargetPath, containerKey} = req.params;
 
-				return finalMarkdown;
-			});
-	}
+		let markdownPromise = new Promise((resolve, reject) => resolve(markdown));
 
-	// markdown has either had it's embedded base64 images published to and linked from S3 or it has been untouched.
-	markdownPromise.then(finalMarkdown => {
+		// look for base64 embedded images
+		const markdownAssetExtractor = new MarkdownAssetExtractor(markdown);
+		if(markdownAssetExtractor.containsBase64Images()) {
+			// parse them out
+			const extracted = markdownAssetExtractor.extractBase64Images();
+			const s3Pub = new S3Publisher();
+			const folderPath = `test`;
+
+			//TODO: for each image being published, check to see if the width is less than the original width
+			//  if so, create a resize-on-the-fly url
+			// after publish, each resize-on-the-fly url should be requested
+			// then use the resized url in the final markdown
+
+			const publishes = extracted.images.map((match, index) => {
+				return s3Pub.publishAsset(match.fileName, match.base64, folderPath, match.imageType);
+			})
+
+			markdownPromise = Promise.all(publishes)
+				.then(assets => {
+
+					let finalMarkdown = extracted.updatedMarkdown;
+
+					assets.forEach(asset => {
+						finalMarkdown = finalMarkdown.replace(asset.originalFileName, asset.url);
+					})
+
+					return finalMarkdown;
+				});
+		}
+
+		// markdown has either had it's embedded base64 images published to and linked from S3 or it has been untouched.
+		return markdownPromise.then(finalMarkdown => {
 			return Controller.saveFragment(appKey, resourceTargetPath, containerKey, finalMarkdown)
 		})
 		.then(contentFragment => {

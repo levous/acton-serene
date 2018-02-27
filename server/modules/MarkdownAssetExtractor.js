@@ -1,5 +1,8 @@
-const regexBase64Image = /\(data:(image\/[a-zA-Z]*);base64,([^\)]*)\)/g;
+const sizeOf = require('image-size');
 const mime = require('mime-types');
+
+const regexBase64Image = /\(data:(image\/[a-zA-Z]*);base64,([^\)]*)\)/g;
+
 class MarkdownAssetExtractor {
 
   constructor(markdown) {
@@ -18,11 +21,14 @@ class MarkdownAssetExtractor {
       const extension = mime.extension(imageType);
       var d = new Date();
       const fileName = `${d.getFullYear()}${d.getMonth()+1}${d.getDate()}_image${matchIdx++}.${extension}`;
+      const dimensions = sizeOf(new Buffer(base64, 'base64'));
+      
       matches.push({
           match,
           imageType,
           base64,
-          fileName
+          fileName,
+          dimensions
       });
     });
 

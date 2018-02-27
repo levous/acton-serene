@@ -39,7 +39,9 @@ const ResourceList = ({resourceList, selectedResourceTargetPath, onSelectResourc
           key={i}
           header={resource.resourceTargetPath}
           onClick={() => onSelectResource(resource)}
-          {...listItemAttributes(resource)}>last saved: {new moment(resource.updatedAt).format('MM/DD/YYYY')}</ListGroupItem>
+          {...listItemAttributes(resource)}>
+          last saved: {new moment(resource.updatedAt).format('MM/DD/YYYY')}
+        </ListGroupItem>
         )
       )}
     </ListGroup>

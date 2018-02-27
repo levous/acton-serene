@@ -33,6 +33,61 @@ describe('ContentPackageController Spec', function () {
     mongooseHelper.resetDatabase(done)
   })
 
+	describe('ContentPackage savePackage()', function () {
+
+    it('Should create a new ContentPackage when no match found', function () {
+
+			const cp = {
+        appKey: 'app-key',
+        resourceTargetPath: 'some-targeting-key'
+			}
+
+			var ContentPackageController = require('../../controllers/content-package.controller')(ContentPackage);
+
+			return ContentPackageController.savePackage(cp)
+      .then(contentPackage => {
+				console.log('savePackage return', contentPackage)
+				contentPackage.should.be.instanceof(Object);
+				contentPackage.appKey.should.be.instanceof(String).and.equal(cp.appKey);
+				contentPackage.resourceTargetPath.should.equal(cp.resourceTargetPath);
+				contentPackage.contentFragments.should.be.instanceOf(Array).and.have.lengthOf(0);
+      });
+
+		});
+
+		it('Should update value in matching ContentPackage', function () {
+
+			const cp = {
+        appKey:'app-key',
+        resourceTargetPath:'some key-to-match'
+			}
+
+			var ContentPackageController = require('../../controllers/content-package.controller')(ContentPackage);
+			let cp_id = null;
+			return new ContentPackage({
+				appKey: cp.appKey,
+				resourceTargetPath: 'banana'
+			})
+			.save()
+			.then((item) => {
+				should.exist(item);
+				cp.id = item.id;
+				cp_id = cp.id;
+				console.log('cp', cp)
+				return ContentPackageController.savePackage(cp);
+			})
+			.then(contentPackage => {
+				contentPackage.should.be.instanceof(Object);
+				contentPackage.appKey.should.be.instanceof(String).and.equal(cp.appKey);
+				contentPackage.id.should.equal(cp_id);
+				contentPackage.resourceTargetPath.should.equal(cp.resourceTargetPath);
+				contentPackage.contentFragments.should.be.instanceOf(Array).and.have.lengthOf(0);
+
+			})
+
+		});
+	});
+
 	describe('ContentPackage saveFragment()', function () {
 
     it('Should create a new ContentPackage when no match found', function () {

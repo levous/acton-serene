@@ -1,11 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ReactQuill, {Quill} from 'react-quill';
+import markdownIt from 'markdown-it';
 import {ImageDrop} from 'quill-image-drop-module';
 import ImageResize from 'quill-image-resize-module';
 import 'react-quill/dist/quill.snow.css';
 // ensure attributes are maintained the editor after update / save
 
+const mdown = markdownIt({xhtmlOut:true});
 Quill.register('modules/imageDrop', ImageDrop);
 Quill.register('modules/imageResize', ImageResize);
 
@@ -31,6 +33,9 @@ class Editor extends React.Component {
 
   componentDidMount () {
     this.registerFormats()
+
+    if(this.props.pasteMarkdown) this.quillRef.clipboard.dangerouslyPasteHTML(mdown.render(this.props.pasteMarkdown));
+
   }
 
   componentDidUpdate () {
@@ -60,6 +65,8 @@ class Editor extends React.Component {
     const html = editor.getHTML();
     if(this.props.onHtmlUpdate) this.props.onHtmlUpdate(html);
   }
+
+
 
   render () {
     return (

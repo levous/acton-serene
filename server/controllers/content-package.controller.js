@@ -18,8 +18,7 @@ var ContentPackageController = function(ContentPackage){
 			//TODO: convert to rich NotFoundError
 			if(!contentPackage) throw new Error('Not Found');
 
-
-      let managedContent = {html: {}, markdown: {}};
+      let managedContent = {id: contentPackage.id, resourceTargetPath: resourceTargetPath, html: {}, markdown: {}};
       contentPackage.contentFragments.forEach(fragment => {
         managedContent.html[fragment.containerKey] = mdown.render(fragment.markdown);
 				managedContent.markdown[fragment.containerKey] = fragment.markdown;
@@ -87,7 +86,29 @@ var ContentPackageController = function(ContentPackage){
 			}
 		});
 	}
-	
+
+	Controller.savePackage = function(contentPackage) {
+		const find = contentPackage.id ? ContentPackage.findById(contentPackage.id) : Controller.findPackage(contentPackage.appKey, contentPackage.resourceTargetPath);
+		return find.then(matchingPackage => {
+
+			if(matchingPackage) {
+				Object.assign(matchingPackage, contentPackage);
+				return matchingPackage.save();
+			} else {
+				// ensure empty props where needed, copy passed data
+				const newPackage = Object.assign({
+						appKey:null,
+						resourceTargetPath: null,
+						contentFragments: []
+					},
+					contentPackage
+				);
+				
+				return new ContentPackage(newPackage).save();
+			}
+		})
+	}
+
 
 	Controller.post = function(req, res, next){
 		var newContentPackage = new ContentPackage(req.body);

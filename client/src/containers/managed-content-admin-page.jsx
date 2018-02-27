@@ -5,10 +5,12 @@ import { withRouter } from 'react-router';
 import PropTypes from 'prop-types';
 import { Transition } from 'react-transition-group';
 import path from 'path';
-import { Button, Panel } from 'react-bootstrap';
+import { Button, Panel, Modal, Glyphicon } from 'react-bootstrap';
 import Turndown from 'turndown';
 import TurndownPluginImageWithStyle from 'turndown-plugin-image-with-style';
 import Editor from '../components/editor';
+import pretty from 'pretty';
+
 import ResourceList from '../components/content-admin/resource-list';
 import ResourceEdit from '../components/content-admin/resource-edit';
 import HttpStatusPresenter from '../components/http-status-presenter';
@@ -66,11 +68,17 @@ class ManagedContentAdminPage extends Component {
       updatedHtmlFragments: {},
       resourceList: null,
       managedContent: null,
-      loading: false
+      loading: false,
+      showEditResource: false
     };
 
     this.showLoading = this.showLoading.bind(this);
+    this.showHtml = this.showHtml.bind(this);
     this.handleFetchError = this.handleFetchError.bind(this);
+    this.addNewResource = this.addNewResource.bind(this);
+    this.handleResourceUpdate = this.handleResourceUpdate.bind(this);
+    this.handleSelectResource = this.handleSelectResource.bind(this);
+    this.editResource = this.editResource.bind(this);
 
   }
 
@@ -105,6 +113,10 @@ class ManagedContentAdminPage extends Component {
 
   showLoading(loading){
     this.setState({loading: loading});
+  }
+
+  showHtml(containerKey){
+    this.setState({showHtmlContainerKey: containerKey});
   }
 
 //TODO: replace this inline shit with redux
@@ -193,11 +205,16 @@ class ManagedContentAdminPage extends Component {
       console.log(data);
       that.handleHtmlUpdate(data.contentFragment.containerKey, data.contentFragment.html)
       that.showLoading(false);
+      that.showHtml(data.contentFragment.containerKey)
     }).catch(that.handleFetchError);
   }
 
   addNewResource(){
+    this.setState({managedContent:{resourceTargetPath: null}, showEditResource: true})
+  }
 
+  editResource(){
+    this.setState({showEditResource: true})
   }
 
   handleSelectResource(resource) {
@@ -205,7 +222,40 @@ class ManagedContentAdminPage extends Component {
     this.loadManagedContent(resource.resourceTargetPath);
   }
 
-  handleResourceUpdate(resource) {
+  handleResourceUpdate(managedContent) {
+
+    if(!managedContent) return alert('BOOOO!  Nothing to Save');
+
+    this.showLoading(true);
+    this.setState({showEditResource: false})
+
+    const apiURI = API_HOST + path.join('api', 'content-packages', APP_KEY);
+
+    let headers = new Headers();
+    headers.append('Content-Type', 'application/json');
+
+    // losing context of 'this' in 'then' so referenced as 'that'.  there!
+    //  (probably need to bind in ctor)
+    // managedContent is derived from contentPackage.  for this call, they look the same
+    const that = this;
+    fetch(apiURI, {
+      method: 'post',
+      body: JSON.stringify({contentPackage: managedContent}),
+      headers: headers
+    }).then(function(response) {
+
+      if (!response.ok) {
+        that.setState({fetchResponseStatus: {code:response.status, message: response.statusText }})
+        throw Error(response.statusText);
+      }
+
+      return response.json();
+    }).then(function(data) {
+      //TODO: use promises to cleanly chain these things
+      //TODO: find the proper record rather than sending contentPackage
+      that.loadResourceList();
+      that.handleSelectResource(data.contentPackage);
+    }).catch(that.handleFetchError);
 
   }
 
@@ -218,20 +268,30 @@ class ManagedContentAdminPage extends Component {
   render() {
     // note:  shouldComponentUpdate is implemented in this component so
     //        calls to setState will not cause a re-render unless explicitly implemented
-    let contentFragment = null;
 
     const fetchResponseStatus = this.state.fetchResponseStatus;
 
-    const FragmentEditorList = ({ htmlFragments, ...props }) => {
+    const FragmentEditorList = ({ htmlFragments, showHtmlContainerKey, ...props }) => {
       return (
-        <div {...props} >
+        <div {...props} style={{clear: 'both'}}>
           {Object.entries(htmlFragments).map(([containerKey, fragment]) => (
             <Panel key={containerKey}>
               <Panel.Body>
                 <h2>{containerKey}</h2>
                 <Editor editorHtml={fragment} onHtmlUpdate={(html) => this.handleHtmlUpdate(containerKey, html) }/>
                 <Button bsStyle="primary" style={{float:'right', marginTop: '25px'}} onClick={() => this.saveManagedContentFragment(containerKey) }>Save</Button>
-                <small><div>{ contentFragment }</div></small>
+                <Button bsStyle="secondary" style={{float:'right', marginTop: '25px'}} onClick={() => this.pasteMarkdown(containerKey) }>Paste Markdown</Button>
+                <Transition in={(containerKey === showHtmlContainerKey)} timeout={duration}>
+                  {(state) => (
+                    <div style={{
+                      ...defaultTransitionStyle,
+                      ...transitionStyles[state],
+                      ...{float: 'left', width:'90%'}
+                    }}>
+                      <small><textarea style={{width:'100%', height: '20em'}}>{ pretty(fragment) }</textarea></small>
+                    </div>
+                  )}
+                </Transition>
               </Panel.Body>
             </Panel>
           ))}
@@ -241,30 +301,37 @@ class ManagedContentAdminPage extends Component {
     }
 
     const htmlFragments = this.state.updatedHtmlFragments || {};
-
+    console.log('.>>> this.state.managedContent', this.state.managedContent);
     return (
       <div>
-        <Button style={{float:'right', margin: '5px'}} onClick={() => this.addNewResource() }>+</Button>
+        <Button style={{float:'right', margin: '5px'}} onClick={this.addNewResource}>+</Button>
+        <Modal show={this.state.showEditResource}>
+          <Modal.Header>
+            <Modal.Title>Add New Resource</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <ResourceEdit managedContent={this.state.managedContent} onResourceUpdate={this.handleResourceUpdate}  />
+          </Modal.Body>
+          <Modal.Footer>
+          </Modal.Footer>
+        </Modal>
         <div style={{clear:'both'}}>
-          <ResourceEdit resource={this.state.editResource}
-            onResourceUpdate={(resource) => this.handleResourceUpdate(resource)}
-            />
+          {
+            //<ResourceEdit managedContent={this.state.managedContent} onResourceUpdate={(managedContent) => this.handleResourceUpdate(managedContent)}  />
+          }
         </div>
 
         <ResourceList resourceList={this.state.resourceList}
           selectedResourceTargetPath={this.props.match.params.resourceKey}
-          onSelectResource={(resource) => this.handleSelectResource(resource)}
+          onSelectResource={this.handleSelectResource}
           />
 
+
+        <Button className='pull-right'><Glyphicon glyph="edit" onClick={this.editResource}/></Button>
         <h1>{this.props.match.params.resourceKey}</h1>
 
         <Fade in={(fetchResponseStatus !== null)} fetchResponseStatus={fetchResponseStatus} />
-        <FragmentEditorList htmlFragments={htmlFragments}/>
-        {
-          //<Editor key={0} editorHtml={contentFragment} onHtmlUpdate={(html) => this.handleHtmlUpdate(CONTAINER_KEY, html) }/>
-
-          //<Button bsStyle="primary" onClick={() => this.saveManagedContentFragment(CONTAINER_KEY) }>Save</Button>
-        }
+        <FragmentEditorList htmlFragments={htmlFragments} showHtmlContainerKey={this.state.showHtmlContainerKey}/>
         <LoadingSpinner loading={this.state.loading} />
       </div>
     );

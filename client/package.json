@@ -6,10 +6,12 @@
     "bootstrap": "^4.0.0",
     "history": "^4.7.2",
     "jquery": "^1.12.4",
+    "markdown-it": "^8.4.1",
     "moment": "^2.20.1",
     "popper.js": "^1.13.0",
+    "pretty": "^2.0.0",
     "prop-types": "^15.6.0",
-    "quill": "github:levous/quill",
+    "quill": "github:levous/quill#master",
     "quill-image-drop-module": "^1.0.3",
     "quill-image-resize-module": "^3.0.0",
     "react": "^16.2.0",
@@ -19,7 +21,8 @@
     "react-router-dom": "^4.2.2",
     "react-scripts": "1.1.1",
     "react-transition-group": "^2.2.1",
-    "turndown-plugin-image-with-style": "^1.0.5"
+    "turndown": "^4.0.1",
+    "turndown-plugin-image-with-style": "^1.0.9"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
@@ -42,7 +45,6 @@
     "sass-loader": "^6.0.6",
     "source-list-map": "^2.0.0",
     "style-loader": "^0.20.2",
-    "turndown": "^4.0.1",
     "uglify-js": "^3.3.12",
     "url-loader": "^0.6.2",
     "webpack": "^3.11.0",
