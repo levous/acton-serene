@@ -37,7 +37,11 @@ if(!dbUri){
  * Open database connection
  */
 
-var db = mongoose.connect(dbUri);
+var db = mongoose
+  .connect(dbUri)
+  .catch(function (reason) {
+    console.log('Unable to connect to the mongodb instance. Error: ', reason)
+  });
 
 mongoose.connection.on('connected', function () {
   console.log('Mongoose default connection open to ' + dbUri);

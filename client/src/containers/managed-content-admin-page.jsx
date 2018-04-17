@@ -128,6 +128,7 @@ class ManagedContentAdminPage extends Component {
   }
 
   loadResourceList() {
+  
     const apiURI = API_HOST + path.join('api', 'content-packages', APP_KEY);
     console.log('loadResourceList apiURI:', apiURI);
     this.showLoading(true);
